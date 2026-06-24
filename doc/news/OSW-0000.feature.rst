@@ -1,0 +1,1 @@
+First implementation: inference-only two-stage NBEATSx + per-solar-slot Ridge twilight temperature forecaster, with EFD FeatureBuilder, retrain script and CLIs.

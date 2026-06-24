@@ -20,6 +20,9 @@ pytest_session.txt
 .pytest_cache
 .coverage
 
+# PyTorch Lightning training artifacts (emitted by retrain / NBEATSx)
+lightning_logs/
+
 # Local notes / editor backups / Claude Code workspace
 prompt.txt
 prompt.txt~

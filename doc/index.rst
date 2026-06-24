@@ -6,7 +6,18 @@
 lsst.ts.weathernbeats
 #####################
 
-.. Paragraph that describes what this Python module does and links to related modules and frameworks.
+Inference-only two-stage NBEATSx + per-solar-slot Ridge twilight temperature
+forecaster.  Recent weather telemetry is resampled onto a 48-step solar-time
+grid, a pre-trained NBEATSx network produces a continuous absolute-temperature
+forecast, and pre-trained per-solar-slot Ridge correctors calibrate the whole
+curve; the operational twilight, 3 h dome-opening and 9 h morning values are
+read off the corrected curve.
+
+.. toctree::
+   :maxdepth: 1
+
+   training
+   version_history
 
 .. .. _lsst.ts.weathernbeats-using:
 
