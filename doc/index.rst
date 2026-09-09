@@ -16,6 +16,7 @@ read off the corrected curve.
 .. toctree::
    :maxdepth: 1
 
+   integration
    training
    version_history
 
