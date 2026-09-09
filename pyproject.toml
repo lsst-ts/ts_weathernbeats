@@ -19,6 +19,7 @@ where = [ "python" ]
 [project.scripts]
 run_weathernbeats = "lsst.ts.weathernbeats:run_forecast"
 train_weathernbeats = "lsst.ts.weathernbeats:run_training"
+serve_weathernbeats = "lsst.ts.weathernbeats.service:serve"
 
 [tool.setuptools_scm]
 # version_file = "python/lsst/ts/weathernbeats/version.py"
@@ -28,4 +29,5 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-asyncio"]
+dev = ["pytest", "pytest-asyncio", "httpx"]
+service = ["fastapi", "uvicorn"]
