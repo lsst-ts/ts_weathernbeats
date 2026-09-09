@@ -10,6 +10,11 @@ This describes how ``ts_weatherforecast`` should consume this package's
 forecasts, replacing its current in-process Prophet fit with an HTTP call to
 the forecast service (``serve_weathernbeats``, see the package README).
 
+Why this matters beyond WeatherForecast itself: ``tel_hourlyTrend.temperature``
+is what LOVE (the operator UI) reads to display the forecast on the summit
+dashboard. Operators see whatever this integration produces directly --
+including the horizon/cadence gap called out below, if it isn't resolved.
+
 What ``ts_weatherforecast`` does today
 =======================================
 
