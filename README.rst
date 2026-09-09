@@ -27,6 +27,16 @@ Regenerate the artifacts from telemetry::
 
     train_weathernbeats --csv telemetry.csv --output /path/to/bundle
 
+Trained bundles are not committed to git (binary artifacts don't belong in
+the repo). The canonical shared copies on USDF/S3DF, readable and writable
+by the whole team (``rubin_users`` group, not one person's home dir), live
+under::
+
+    /sdf/group/rubin/web_data/guider-diagnostics/ts_weathernbeats/models/<version>/
+
+e.g. ``nbeatsx_ridge_v0.2.0/``. Point ``--bundle`` / ``WEATHERNBEATS_BUNDLE``
+there.
+
 The forecaster method is validated in the SPIE paper (``docs/spie_nbeatsx.tex``).
 
 Serving predictions over HTTP
@@ -36,7 +46,7 @@ Serving predictions over HTTP
 temperatures via a single API call instead of importing this package::
 
     pip install -e ".[service]"
-    export WEATHERNBEATS_BUNDLE=/path/to/bundle
+    export WEATHERNBEATS_BUNDLE=/sdf/group/rubin/web_data/guider-diagnostics/ts_weathernbeats/models/nbeatsx_ridge_v0.2.0
     export WEATHERNBEATS_SIMULATION=1   # 0 (default) queries the live EFD
     serve_weathernbeats                 # runs on 0.0.0.0:8080 (set $PORT to change)
 
