@@ -99,7 +99,16 @@ def _backward_ols_slope(y: pd.Series, window: int) -> pd.Series:
 
 
 class MockClient:
-    """A mock EFD client returning synthetic diurnal temperature telemetry."""
+    """A mock EFD client returning synthetic diurnal temperature telemetry.
+
+    The diurnal curve is a least-squares cosine fit (``a0 + a1*cos(2*pi*h/24)
+    + a2*sin(2*pi*h/24)``) to real Summit Weather Tower telemetry from
+    ``RubinsOraclePaper/data/temp_history_all_dec2025_sunrise_sunset.csv``,
+    restricted to a +/-15 day window around the March equinox (day-of-year
+    65-95) across 2024-2025 (5952 15-min samples) -- matching this mock's own
+    "near an equinox" date. Noise is drawn with the residual std of that fit
+    (2.40 deg C), not an arbitrary +/-0.3 deg C band.
+    """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         pass
@@ -110,9 +119,9 @@ class MockClient:
         end = pd.Timestamp("2026-03-21T00:00:00")  # near an equinox
         index = pd.date_range(end=end, periods=n, freq="min")
         hours = index.hour + index.minute / 60.0
-        # Simple diurnal cycle + small noise; deterministic-ish via stdlib.
-        diurnal = 10.0 - 6.0 * np.cos(2 * np.pi * (hours - 15.0) / 24.0)
-        noise = np.array([random.uniform(-0.3, 0.3) for _ in range(n)])
+        # Real equinox-window fit (see class docstring): a0, a1, a2.
+        diurnal = 14.6993 + 0.3790 * np.cos(2 * np.pi * hours / 24) - 1.8592 * np.sin(2 * np.pi * hours / 24)
+        noise = np.array([random.gauss(0.0, 2.4033) for _ in range(n)])
         return pd.DataFrame({"mean_temperature": diurnal + noise}, index=index)
 
 
