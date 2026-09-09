@@ -23,6 +23,11 @@ pytest_session.txt
 # PyTorch Lightning training artifacts (emitted by retrain / NBEATSx)
 lightning_logs/
 
+# Trained model bundles -- binary artifacts, not source (see review comment
+# on PR for add-nbeatsx-ridge-forecaster). Canonical shared USDF/S3DF path
+# TBD; point WEATHERNBEATS_BUNDLE at wherever the team lands on -- not here.
+models/
+
 # Local notes / editor backups / Claude Code workspace
 prompt.txt
 prompt.txt~
