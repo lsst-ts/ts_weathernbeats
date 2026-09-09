@@ -1,3 +1,33 @@
-# Pytest configuration required to prevent pytest from looking for
-# configurations in parent directories. Can be empty.
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ts-weathernbeats"
+description = "Inference-only NBEATSx+Ridge twilight temperature forecaster for the `Vera C. Rubin Observatory <https://lsst.org>`_."
+license = { text = "GPL" }
+readme = "README.rst"
+urls = { documentation = "https://ts-weathernbeats.lsst.io", source_code = "https://github.com/lsst-ts/ts_weathernbeats" }
+dynamic = ["version"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json"]
+
+[tool.setuptools.packages.find]
+where = [ "python" ]
+
+[project.scripts]
+run_weathernbeats = "lsst.ts.weathernbeats:run_forecast"
+train_weathernbeats = "lsst.ts.weathernbeats:run_training"
+serve_weathernbeats = "lsst.ts.weathernbeats.service:serve"
+
+[tool.setuptools_scm]
+# version_file = "python/lsst/ts/weathernbeats/version.py"
+
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "httpx"]
+service = ["fastapi", "uvicorn"]

@@ -1,0 +1,46 @@
+{% set data = load_setup_py_data() %}
+{% set version = data.get('version') %}
+package:
+    name: ts-weathernbeats
+    version: {{ version }}
+
+source:
+    path: ../
+
+build:
+    noarch: python
+    entry_points:
+      - run_weathernbeats = lsst.ts.weathernbeats:run_forecast
+      - train_weathernbeats = lsst.ts.weathernbeats:run_training
+      - serve_weathernbeats = lsst.ts.weathernbeats.service:serve
+    script: {{ PYTHON }} -m pip install --no-deps --ignore-installed .
+    string: "py{{ PY_VER | replace('.', '') }}{{ PKG_HASH }}_{{ PKG_BUILDNUM }}"
+
+test:
+    requires:
+        - ts-conda-build =0.5
+        - httpx
+    source_files:
+        - python
+        - tests
+        - pyproject.toml
+    commands:
+        - pytest
+
+requirements:
+    host:
+        - python {{ python }}
+        - pip
+        - setuptools_scm ={{ setuptools_scm}}
+        - setuptools >={{ setuptools }}
+    run:
+        - python {{ python }}
+        - numpy
+        - pandas =2.3
+        - astropy
+        - scikit-learn =1.8
+        - joblib
+        - neuralforecast =3.1
+        - lsst-efd-client =0.14
+        - fastapi
+        - uvicorn
