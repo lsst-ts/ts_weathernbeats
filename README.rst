@@ -50,3 +50,9 @@ Then::
 ``std``); pass an ISO8601 UTC ``time`` for a single interpolated value at any
 moment in the horizon -- the same read-off used internally for the
 twilight/dome/HVAC setpoints, generalized to any timestamp.
+
+On S3DF/USDF nodes, the NBEATSx (Lightning) predict path probes this host's
+InfiniBand stack even for a single-process CPU call, and the first request
+hangs indefinitely on ``ibv_reg_mr``. Force UCX onto TCP to avoid it::
+
+    UCX_TLS=tcp,self,sm NCCL_IB_DISABLE=1 serve_weathernbeats
