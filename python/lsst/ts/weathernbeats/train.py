@@ -79,7 +79,7 @@ def load_training_grid(csv_path: str | Path | None) -> pd.DataFrame:
 
 
 def train_nbeatsx(grid: pd.DataFrame):
-    """Train the direct-temperature NBEATSx network (target = absolute ``y``)."""
+    """Train the direct-temperature NBEATSx network on absolute ``y``."""
     from neuralforecast import NeuralForecast
     from neuralforecast.losses.pytorch import HuberLoss
     from neuralforecast.models import NBEATSx
@@ -154,7 +154,7 @@ def fit_slot_ridges(nf, grid, hist, futr, n_slots=STEPS_PER_DAY, stride=1):
 
     For every issuance point and every horizon step, the forecast step lands on
     a target solar coordinate; samples are bucketed by the *target* slot phi.
-    Each sample is ``(issuance-time features + T_nb at the step) -> measured T``.
+    Each sample is ``(issuance-time features + T_nb at step) -> measured T``.
     """
     from sklearn.linear_model import Ridge
     from sklearn.preprocessing import StandardScaler

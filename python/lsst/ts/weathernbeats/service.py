@@ -46,7 +46,7 @@ _model: WeatherForecastModel | None = None
 
 
 def get_model() -> WeatherForecastModel:
-    """Load (once) and return the model bundle from ``WEATHERNBEATS_BUNDLE``."""
+    """Load (once) and return the model from ``WEATHERNBEATS_BUNDLE``."""
     global _model
     if _model is None:
         _model = WeatherForecastModel.load(os.environ["WEATHERNBEATS_BUNDLE"])
@@ -60,7 +60,7 @@ async def forecast(
     ),
     model: WeatherForecastModel = Depends(get_model),
 ) -> dict:
-    """Return the calibrated forecast curve, or one value interpolated at ``time``.
+    """Return the calibrated forecast curve, or its value at ``time``.
 
     Without ``time``, returns every horizon step (``time``, ``temperature``,
     ``std``). With ``time``, returns a single interpolated ``temperature`` at

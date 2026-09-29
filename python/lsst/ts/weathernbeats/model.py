@@ -27,10 +27,11 @@ anything at inference time.  The inference path (see SPIE paper §4) is:
 1. Stage 1 -- run the pre-trained NBEATSx network forward from the 48-step
    solar-grid lookback to obtain a continuous **absolute** temperature forecast
    ``T_NB(phi)`` at every step over the horizon.
-2. Stage 2 -- for each forecast step, snap its solar slot ``phi`` to the nearest
-   trained slot, build that slot's feature vector (solar-grid features +
-   ``T_NB`` at the step) and apply the per-slot ``StandardScaler`` + ``Ridge``
-   corrector, which outputs absolute temperature directly.
+2. Stage 2 -- for each forecast step, snap its solar slot ``phi`` to the
+   nearest trained slot, build that slot's feature vector (solar-grid
+   features + ``T_NB`` at the step) and apply the per-slot
+   ``StandardScaler`` + ``Ridge`` corrector, which outputs absolute
+   temperature directly.
 
 The result is a bias-corrected continuous curve; the operational twilight, 3 h
 dome-opening and 9 h morning values are read off this curve.
@@ -87,8 +88,8 @@ def interp_at(
 
     Matches the ``interp_at`` helper in ``twilight_forecast_history.ipynb``:
     ``temperatures`` is sampled every ``delta_time`` seconds starting one step
-    after ``sndstamp_unix``.  Returns ``NaN`` when ``target_unix`` falls outside
-    the trajectory.
+    after ``sndstamp_unix``.  Returns ``NaN`` when ``target_unix`` falls
+    outside the trajectory.
     """
     temperatures = np.asarray(temperatures, dtype=float)
     index_float = (target_unix - sndstamp_unix) / delta_time - 1
@@ -233,13 +234,14 @@ class WeatherForecastModel:
         """
         horizon = self._nbeatsx_forecast(grid)
         curve = self._correct(grid, horizon)
-        # Map the solar-grid horizon back onto real UTC.  A solar step is uniform
-        # in *solar* time but NOT in wall-clock: daytime steps are short and
-        # nighttime steps long (and the factor flips at sunrise/sunset).  Use the
-        # actual sun events as anchors -- consecutive events (sunrise->sunset->
-        # sunrise) are each +0.5 solar-day-fraction regardless of their real
-        # duration, so interpolating solar position against event times yields
-        # the correct variable wall-clock step automatically.
+        # Map the solar-grid horizon back onto real UTC.  A solar step is
+        # uniform in *solar* time but NOT in wall-clock: daytime steps are
+        # short and nighttime steps long (and the factor flips at
+        # sunrise/sunset).  Use the actual sun events as anchors --
+        # consecutive events (sunrise->sunset->sunrise) are each +0.5
+        # solar-day-fraction regardless of their real duration, so
+        # interpolating solar position against event times yields the
+        # correct variable wall-clock step automatically.
         clean = grid.dropna(subset=["y"])
         last_real = pd.Timestamp(clean["ds_real"].iloc[-1])
         ds_real = self._solar_to_real(last_real, len(curve))
@@ -248,7 +250,7 @@ class WeatherForecastModel:
 
     @staticmethod
     def _solar_to_real(last_real: pd.Timestamp, n_steps: int) -> np.ndarray:
-        """Real-UTC timestamps for ``n_steps`` solar-grid steps past ``last_real``.
+        """Real-UTC timestamps for ``n_steps`` solar steps past ``last_real``.
 
         Builds sun-event anchors (sunrise / sunset zero-crossings of the solar
         altitude) over a window bracketing the horizon, assigns each event a
@@ -350,7 +352,7 @@ class WeatherForecastModel:
         }
 
     def forecast_window(self, grid: pd.DataFrame) -> pd.DataFrame:
-        """Return the past observations plus the forward half-solar-day forecast.
+        """Return past observations plus the forward half-solar-day forecast.
 
         The forecast is valid for *any* moment of the day -- it is the
         continuous corrected temperature curve over the NBEATSx horizon

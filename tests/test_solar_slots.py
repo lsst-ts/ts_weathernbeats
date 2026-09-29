@@ -83,7 +83,8 @@ def test_solstice_rate_shifts():
     winter = pd.Timestamp("2026-06-21")  # austral winter solstice, short day
     summer = pd.Timestamp("2026-12-21")  # austral summer solstice, long day
     eq = _daytime_hours_per_phi(equinox)
-    # Short winter day -> fewer clock hours per unit phi; long summer day -> more.
+    # Short winter day -> fewer clock hours per unit phi; long summer day ->
+    # more.
     assert _daytime_hours_per_phi(winter) < eq - 1.0
     assert _daytime_hours_per_phi(summer) > eq + 1.0
 

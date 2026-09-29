@@ -77,7 +77,7 @@ def fake_bundle(synthetic_grid):
     feat_cols = [c for c in RIDGE_FEATS if c in synthetic_grid.columns]
     clean = synthetic_grid.dropna(subset=feat_cols + ["y"]).reset_index(drop=True)
     x = clean[feat_cols].to_numpy(dtype=float)
-    # Append a synthetic NBEATSx-prediction column (= y, the persistence proxy).
+    # Append a synthetic NBEATSx-prediction column (= y, persistence proxy).
     x = np.column_stack([x, clean["y"].to_numpy(dtype=float)])
     y = clean["y"].to_numpy(dtype=float)
 

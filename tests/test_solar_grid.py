@@ -102,12 +102,13 @@ def test_solar_time_quarter_landmarks():
     sunrise = np.where((prev < 0) & (alt >= 0))[0]
     sunset = np.where((prev >= 0) & (alt < 0))[0]
 
-    # Sunrise -> 0.0, sunset -> 0.5 (exact, these are the interpolation anchors).
+    # Sunrise -> 0.0, sunset -> 0.5 (exact, these are the interpolation
+    # anchors).
     assert np.allclose(st[sunrise], 0.0, atol=1e-6)
     assert np.allclose(st[sunset], 0.5, atol=1e-6)
 
-    # Solar midday (max altitude) -> 0.25; solar midnight (min altitude) -> 0.75.
-    # Within one grid step (1/(24*60) of a day) of the exact quarter.
+    # Solar midday (max altitude) -> 0.25; solar midnight (min altitude) ->
+    # 0.75.  Within one grid step (1/(24*60) of a day) of the exact quarter.
     tol = 1.0 / (24 * 60)
     assert abs(st[int(np.argmax(alt))] - 0.25) < 5 * tol
     assert abs(st[int(np.argmin(alt))] - 0.75) < 5 * tol
@@ -116,7 +117,7 @@ def test_solar_time_quarter_landmarks():
 def test_solar_time_covers_trailing_night():
     """A series ending mid-night (past solar midnight) keeps its last rows:
     SolarTime there is > 0.5 (night branch), not truncated back to sunset."""
-    # 12:00 UTC start through 05:00 next day -- ends deep in the night at Rubin.
+    # 12:00 UTC start through 05:00 next day: ends deep in the night at Rubin.
     ts = pd.date_range("2026-06-22T12:00", "2026-06-24T05:00", freq="15min")
     df = pd.DataFrame({"ds": ts, "y": np.zeros(len(ts))})
     df["alt_sun"] = get_sun_altitude(pd.DatetimeIndex(df["ds"]))

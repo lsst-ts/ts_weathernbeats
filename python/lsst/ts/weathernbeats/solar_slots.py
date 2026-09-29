@@ -95,7 +95,7 @@ def _phi_to_equinox_hours(phi: float) -> float:
 
 
 def phi_to_equinox_label(phi: float) -> str:
-    """Return the ``"HHMM"`` equinox-day clock label for solar position ``phi``.
+    """Return ``"HHMM"`` equinox-day clock label for solar position ``phi``.
 
     Hours wrap modulo 24 (e.g. solar midnight ``phi=0.75`` -> ``"0000"``).
     """

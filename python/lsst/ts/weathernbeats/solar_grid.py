@@ -116,16 +116,17 @@ def detect_events(
 def _sun_event_anchors(
     start: pd.Timestamp, end: pd.Timestamp, pad_hours: float = 36.0
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Return ``(event_seconds, event_solar)`` for sun events bracketing a span.
+    """Return ``(event_seconds, event_solar)`` of sun events bracketing a span.
 
     Sun-altitude zero-crossings (sunrise rising, sunset setting) are found on a
     1-minute astropy grid padded by ``pad_hours`` either side of ``[start,
     end]`` -- so events *beyond* the data window (e.g. the next sunrise after a
     night that the data does not yet reach) are still available.  Each event is
-    assigned a monotonically increasing solar coordinate: consecutive events are
-    +0.5 apart (sunrise <-> sunset), with sunrise on integer values and sunset
-    on the half-integers.  Interpolating a timestamp against these anchors gives
-    SolarTime with sunrise=0.0, sunset=0.5, solar-midnight=0.75 exactly.
+    assigned a monotonically increasing solar coordinate: consecutive events
+    are +0.5 apart (sunrise <-> sunset), with sunrise on integer values and
+    sunset on the half-integers.  Interpolating a timestamp against these
+    anchors gives SolarTime with sunrise=0.0, sunset=0.5, solar-midnight=0.75
+    exactly.
     """
     grid = pd.date_range(
         pd.Timestamp(start) - pd.Timedelta(hours=pad_hours),
@@ -139,8 +140,9 @@ def _sun_event_anchors(
     ev_mask = rising | setting
     ev_idx = np.where(ev_mask)[0]
     ev_sec = grid[ev_idx].astype("int64").to_numpy() / 1e9
-    # Solar coordinate: sunrise -> *.0, sunset -> *.5.  Anchor the first event to
-    # the nearest half-day boundary by its kind, then step +0.5 per event.
+    # Solar coordinate: sunrise -> *.0, sunset -> *.5.  Anchor the first
+    # event to the nearest half-day boundary by its kind, then step +0.5 per
+    # event.
     ev_solar = 0.5 * np.arange(len(ev_idx), dtype=float)
     if rising[ev_idx[0]]:
         ev_solar += 0.0  # first event is a sunrise -> integer

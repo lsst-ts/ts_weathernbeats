@@ -34,7 +34,8 @@ def test_interp_at_matches_notebook_semantics():
     temps = np.array([10.0, 12.0, 14.0, 16.0])
     snd = 1000.0
     delta = 300.0
-    # index_float = (target - snd)/delta - 1; target one full step past snd+1step.
+    # index_float = (target - snd)/delta - 1; target one full step past
+    # snd+1step.
     target = snd + 2 * delta  # index_float = 1 -> temps[1] = 12
     assert interp_at(temps, snd, target, delta) == pytest.approx(12.0)
     # Out of range -> NaN.
