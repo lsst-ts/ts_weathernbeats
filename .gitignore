@@ -29,6 +29,7 @@ lightning_logs/
 models/
 
 # Local notes / editor backups / Claude Code workspace
+prompt.md
 prompt.txt
 prompt.txt~
 .prompt.txt.un~
