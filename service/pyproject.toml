@@ -1,0 +1,154 @@
+[project]
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
+name = "weathernbeats-service"
+description = "Safir service that publishes ts_weathernbeats temperature forecasts over HTTP"
+license = "GPL-3.0-or-later"
+readme = "README.rst"
+keywords = ["rubin", "lsst"]
+# https://pypi.org/classifiers/
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Natural Language :: English",
+    "Operating System :: POSIX",
+    "Private :: Do Not Upload",
+    "Typing :: Typed",
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.100",
+    "pandas",
+    "pydantic>2",
+    "pydantic-settings>=2",
+    "safir>=5",
+    "ts-weathernbeats",
+    "uvicorn[standard]>=0.34",
+    # Dependencies of ts-weathernbeats, listed here so that the
+    # [tool.uv.sources] entries below apply to them.
+    "lsst-efd-client",
+    "torch",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://ts-weathernbeats.lsst.io"
+Source = "https://github.com/lsst-ts/ts_weathernbeats"
+
+[build-system]
+requires = ["setuptools>=61", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+    "asgi-lifespan",
+    "coverage[toml]>=5.0.2",
+    "httpx",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "uv",
+]
+lint = [
+    "ruff>=0.12",
+]
+nox = [
+    "nox",
+    "nox-uv",
+]
+typing = [
+    "mypy>=1.15",
+]
+
+[tool.uv.sources]
+# The forecasting library is the package at the top of this repository.
+ts-weathernbeats = { path = "..", editable = true }
+# PyPI stops at lsst-efd-client 0.13.1, which pins numpy 1.23.5. Use the 0.14
+# series that conda/meta.yaml pins, from its GitHub repository.
+lsst-efd-client = { git = "https://github.com/lsst-ts/lsst-efd-client", tag = "v0.14.2" }
+# Inference runs on CPU, so use the CPU-only PyTorch wheels on Linux to keep
+# the CUDA libraries out of the Docker image.
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.coverage.run]
+parallel = true
+branch = true
+source = ["weathernbeats_service"]
+
+[tool.coverage.paths]
+source = ["src", ".tox/*/site-packages"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.mypy]
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+enable_error_code = [
+    "deprecated",
+    "exhaustive-match",
+    "explicit-override",
+    "ignore-without-code",
+    "redundant-expr",
+    "redundant-self",
+    "truthy-iterable",
+    "unused-awaitable",
+]
+ignore_missing_imports = true
+local_partial_types = true
+plugins = ["pydantic.mypy"]
+no_implicit_reexport = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+asyncio_mode = "strict"
+# The python_files setting is not for test detection (pytest will pick up any
+# test files named *_test.py without this setting) but to enable special
+# assert processing in any non-test supporting files under tests.  We
+# conventionally put test support functions under tests.support and may
+# sometimes use assert in test fixtures in conftest.py, and pytest only
+# enables magical assert processing (showing a full diff on assert failures
+# with complex data structures rather than only the assert message) in files
+# listed in python_files.
+python_files = ["tests/*.py", "tests/*/*.py"]
+
+# Use the generic Ruff configuration in ruff.toml and extend it with only
+# project-specific settings. Add a [tool.ruff.lint.extend-per-file-ignores]
+# section for project-specific ignore rules.
+[tool.ruff]
+extend = "ruff-shared.toml"
+
+[tool.ruff.lint.isort]
+known-first-party = ["weathernbeats_service", "tests"]
+
+[tool.setuptools_scm]
+# The service shares the repository's git tags with the library.
+root = ".."

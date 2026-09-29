@@ -34,22 +34,25 @@ The forecaster method is validated in the SPIE paper (``docs/spie_nbeatsx.tex``)
 Serving predictions over HTTP
 ==============================
 
-``ts_weatherforecast`` (or anything else, e.g. LOVE) can fetch predicted temperatures via a single API call instead of importing this package::
+``ts_weatherforecast`` (or anything else, e.g. LOVE) can fetch predicted temperatures via a single API call instead of importing this package.
+The ``weathernbeats`` service in ``service/`` is a `Safir <https://safir.lsst.io>`__ FastAPI application built for deployment with Phalanx; see ``service/README.rst`` for its configuration, local development and Docker image.
+Run it locally against a bundle::
 
-    pip install -e ".[service]"
+    cd service
+    make init
     export WEATHERNBEATS_BUNDLE=/sdf/group/rubin/web_data/guider-diagnostics/ts_weathernbeats/models/nbeatsx_ridge_v0.2.0
-    export WEATHERNBEATS_SIMULATION=1   # 0 (default) queries the live EFD
-    serve_weathernbeats                 # runs on 0.0.0.0:8080 (set $PORT to change)
+    export WEATHERNBEATS_SIMULATION=true   # false (default) queries the live EFD
+    make run                               # serves on localhost:8000
 
 Then::
 
-    curl "http://localhost:8080/forecast"               # full horizon curve
-    curl "http://localhost:8080/forecast?time=2026-09-08T04:00:00"  # one value
+    curl "http://localhost:8000/weathernbeats/forecast"                             # full horizon curve
+    curl "http://localhost:8000/weathernbeats/forecast?time=2026-09-08T04:00:00Z"   # one value
 
-``GET /forecast`` always predicts from the latest EFD telemetry.
+``GET /weathernbeats/forecast`` always predicts from the latest EFD telemetry.
 Omit ``time`` for the full curve (every horizon step: ``time``, ``temperature``, ``std``); pass an ISO8601 UTC ``time`` for a single interpolated value at any moment in the horizon -- the same read-off used internally for the twilight/dome/HVAC setpoints, generalized to any timestamp.
 
 On S3DF/USDF nodes, the NBEATSx (Lightning) predict path probes this host's InfiniBand stack even for a single-process CPU call, and the first request hangs indefinitely on ``ibv_reg_mr``.
 Force UCX onto TCP to avoid it::
 
-    UCX_TLS=tcp,self,sm NCCL_IB_DISABLE=1 serve_weathernbeats
+    UCX_TLS=tcp,self,sm NCCL_IB_DISABLE=1 make run

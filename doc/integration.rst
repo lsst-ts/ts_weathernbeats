@@ -6,7 +6,7 @@
 Integrating with the WeatherForecast CSC
 ########################################
 
-This describes how ``ts_weatherforecast`` should consume this package's forecasts, replacing its current in-process Prophet fit with an HTTP call to the forecast service (``serve_weathernbeats``, see the package README).
+This describes how ``ts_weatherforecast`` should consume this package's forecasts, replacing its current in-process Prophet fit with an HTTP call to the ``weathernbeats`` forecast service (``service/`` in this repository).
 
 Why this matters beyond WeatherForecast itself: ``tel_hourlyTrend.temperature`` is what LOVE (the operator UI) reads to display the forecast on the summit dashboard.
 Operators see whatever this integration produces directly -- including the horizon/cadence gap called out below, if it isn't resolved.
@@ -25,11 +25,11 @@ The Prophet piece is what this package's forecast service replaces.
 What changes
 ============
 
-Instead of fitting Prophet in-process, ``make_prediction`` should call this service's ``GET /forecast`` endpoint and use its ``curve`` in place of ``prediction["yhat"]``::
+Instead of fitting Prophet in-process, ``make_prediction`` should call this service's ``GET /weathernbeats/forecast`` endpoint and use its ``curve`` in place of ``prediction["yhat"]``::
 
     async def make_prediction(self) -> pd.Series:
         async with aiohttp.ClientSession(WEATHERNBEATS_URL) as session:
-            async with session.get("/forecast") as resp:
+            async with session.get("/weathernbeats/forecast") as resp:
                 body = await resp.json()
         curve = body["curve"]  # [{"time": iso8601, "temperature": float, "std": float}, ...]
         return pd.Series([row["temperature"] for row in curve])
@@ -44,7 +44,7 @@ This is **not** a drop-in replacement of the array shape:
 * **Horizon and cadence differ.**
   Prophet publishes 288 points on a fixed 5-minute grid covering 24 h.
   This service's curve covers ~12.5 h on a *solar-time* grid (uneven wall-clock spacing -- roughly 30 min steps that compress during the day and stretch at night; see :py:meth:`WeatherForecastModel.predict`).
-  If ``tel_hourlyTrend.temperature`` must stay a fixed-length, fixed-cadence array, the CSC needs to resample this curve onto its own grid (e.g. via ``GET /forecast?time=...`` per desired timestamp, or by interpolating the full curve client-side) rather than publish it as-is.
+  If ``tel_hourlyTrend.temperature`` must stay a fixed-length, fixed-cadence array, the CSC needs to resample this curve onto its own grid (e.g. via ``GET /weathernbeats/forecast?time=...`` per desired timestamp, or by interpolating the full curve client-side) rather than publish it as-is.
 * **Temperature only.**
   This service predicts one quantity.
   It does not provide ``temperatureSpread`` or any other ``tel_hourlyTrend`` field -- those keep coming from Meteoblue, unchanged.
@@ -52,4 +52,6 @@ This is **not** a drop-in replacement of the array shape:
 Running the service
 ====================
 
-The service needs to be deployed and reachable from wherever the CSC runs; see "Serving predictions over HTTP" in this package's README for how to start it, required environment variables (``WEATHERNBEATS_BUNDLE``), and the S3DF/USDF InfiniBand workaround if co-located on that cluster.
+The service needs to be deployed and reachable from wherever the CSC runs.
+It is a Safir application built for Phalanx: ``service/`` builds its Docker image, published to ``ghcr.io/lsst-ts/ts_weathernbeats``, and deploying it needs a Phalanx application (Helm chart) in the Phalanx repository, which is not part of this package.
+See ``service/README.rst`` for its configuration (``WEATHERNBEATS_BUNDLE``, ``LSST_SITE``) and local development, and "Serving predictions over HTTP" in this package's README for the S3DF/USDF InfiniBand workaround if it runs directly on that cluster.

@@ -1,1 +1,2 @@
 First implementation: inference-only two-stage NBEATSx + per-solar-slot Ridge twilight temperature forecaster, with EFD FeatureBuilder, retrain script and CLIs.
+Forecasts are served over HTTP by ``weathernbeats``, a Safir FastAPI application in ``service/`` built for deployment with Phalanx.
