@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 # This Dockerfile has three stages:
 #
 # base-image
@@ -67,6 +69,17 @@ RUN useradd --create-home appuser
 
 # Copy the virtualenv.
 COPY --from=install-image /app/.venv /app/.venv
+
+# Pin the public model release and verify its archive before extraction.
+ARG MODEL_VERSION=0.2.0
+ARG MODEL_SHA256=790e43faf28ec18d397acbfced96ce950d9ca59ebdff91738382c7f1fd745084
+ADD --checksum=sha256:${MODEL_SHA256} \
+    https://github.com/lsst-ts/ts_weathernbeats/releases/download/model-v${MODEL_VERSION}/nbeatsx_ridge_v${MODEL_VERSION}.tar.gz \
+    /tmp/model-bundle.tar.gz
+RUN mkdir -p /opt/models \
+    && tar -xzf /tmp/model-bundle.tar.gz -C /opt/models \
+    && rm /tmp/model-bundle.tar.gz
+ENV WEATHERNBEATS_BUNDLE=/opt/models/nbeatsx_ridge_v${MODEL_VERSION}
 
 # Switch to the non-root user.
 USER appuser
