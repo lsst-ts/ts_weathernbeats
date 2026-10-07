@@ -15,10 +15,10 @@ dynamic = ["version"]
 dependencies = [
     "astropy",
     "joblib",
-    "lsst-efd-client==0.14.*",
+    "lsst-efd-client",
     "neuralforecast==3.1.*",
     "numpy",
-    "pandas==2.3.*",
+    "pandas>=2.3",
     "scikit-learn==1.8.*",
 ]
 

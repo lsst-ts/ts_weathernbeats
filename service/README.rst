@@ -67,11 +67,39 @@ The build context is the repository root, because the image installs the library
 
     docker build -f service/Dockerfile -t weathernbeats .
 
-The image does not contain a model bundle.
-Mount one and point ``WEATHERNBEATS_BUNDLE`` at it::
+The image includes the pinned ``model-v0.2.0`` release bundle at ``/opt/models/nbeatsx_ridge_v0.2.0``.
+Run it with the bundled model::
 
-    docker run -p 8080:8080 -v /path/to/models:/models:ro \
-        -e WEATHERNBEATS_BUNDLE=/models/nbeatsx_ridge_v0.2.0 \
+    docker run -p 8080:8080 \
         -e WEATHERNBEATS_SIMULATION=true weathernbeats
 
+To use a different bundle, mount it read-only and set ``WEATHERNBEATS_BUNDLE`` to its path in the container.
+The Dockerfile's ``MODEL_VERSION`` and ``MODEL_SHA256`` build arguments select the release asset and verify its SHA-256 digest.
+Update their defaults for a new model, or override both with ``docker build --build-arg``.
+
 GitHub Actions builds the image and pushes it to ``ghcr.io/lsst-ts/ts_weathernbeats`` for releases and for pull requests from ``tickets/`` branches.
+
+Publishing the model bundle
+===========================
+
+Before publishing a ``model-v*`` release, merge the model-release exclusion in ``.github/workflows/service.yaml`` into ``develop`` through a pull request.
+Otherwise, publishing the model release will also start a service image build.
+
+From the repository root, confirm that the bundle's ``metadata.json`` has ``model_version`` set to ``0.2.0``.
+Then archive the whole directory and check its SHA-256 digest::
+
+    tar -czf /tmp/nbeatsx_ridge_v0.2.0.tar.gz \
+        -C service/bundles nbeatsx_ridge_v0.2.0
+    shasum -a 256 /tmp/nbeatsx_ridge_v0.2.0.tar.gz
+
+Copy the resulting digest into the ``MODEL_SHA256`` argument default in ``service/Dockerfile``.
+Then upload that exact archive, without regenerating it, to a new GitHub release::
+
+    gh release create model-v0.2.0 /tmp/nbeatsx_ridge_v0.2.0.tar.gz \
+        --repo lsst-ts/ts_weathernbeats --target develop \
+        --title "Model v0.2.0" \
+        --notes "NBEATSx+Ridge model bundle v0.2.0" --latest=false
+
+GitHub CLI creates the tag at ``develop`` if it does not already exist, adds the archive as a release asset, and publishes the release.
+For later models, use a new ``model-v*`` tag and archive name, then update the ``MODEL_VERSION`` and ``MODEL_SHA256`` argument defaults in the Dockerfile.
+Publish the asset before running a service image build that refers to it.

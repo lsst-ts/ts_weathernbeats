@@ -2,8 +2,9 @@
 # of the repository, so these patterns are relative to it. Keep .git, which
 # setuptools_scm needs to version the library and the application.
 
-# Model bundles and training output never go in the image.
+# Keep local model bundles and training output out of the build context.
 models/
+service/bundles/
 lightning_logs/
 
 # Documentation builds.
