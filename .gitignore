@@ -31,6 +31,7 @@ lightning_logs/
 # on PR for add-nbeatsx-ridge-forecaster). Canonical shared USDF/S3DF path
 # TBD; point WEATHERNBEATS_BUNDLE at wherever the team lands on -- not here.
 models/
+service/bundles/
 
 # Local notes / editor backups / Claude Code workspace
 prompt.md
