@@ -34,9 +34,9 @@ requirements:
     run:
         - python {{ python }}
         - numpy
-        - pandas =2.3
+        - pandas >=2.3
         - astropy
         - scikit-learn =1.8
         - joblib
         - neuralforecast =3.1
-        - lsst-efd-client =0.14
+        - lsst-efd-client =1

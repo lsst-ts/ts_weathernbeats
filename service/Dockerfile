@@ -78,6 +78,7 @@ ADD --checksum=sha256:${MODEL_SHA256} \
     /tmp/model-bundle.tar.gz
 RUN mkdir -p /opt/models \
     && tar -xzf /tmp/model-bundle.tar.gz -C /opt/models \
+    && chmod a+rX /opt/models \
     && rm /tmp/model-bundle.tar.gz
 ENV WEATHERNBEATS_BUNDLE=/opt/models/nbeatsx_ridge_v${MODEL_VERSION}
 
