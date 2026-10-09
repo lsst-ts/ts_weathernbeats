@@ -72,7 +72,7 @@ COPY --from=install-image /app/.venv /app/.venv
 
 # Pin the public model release and verify its archive before extraction.
 ARG MODEL_VERSION=0.2.0
-ARG MODEL_SHA256=790e43faf28ec18d397acbfced96ce950d9ca59ebdff91738382c7f1fd745084
+ARG MODEL_SHA256=37cb52a0c78cc20a43f83f74b98fe4e9fadcb5709f579da6b0c8ca768531e396
 ADD --checksum=sha256:${MODEL_SHA256} \
     https://github.com/lsst-ts/ts_weathernbeats/releases/download/model-v${MODEL_VERSION}/nbeatsx_ridge_v${MODEL_VERSION}.tar.gz \
     /tmp/model-bundle.tar.gz
