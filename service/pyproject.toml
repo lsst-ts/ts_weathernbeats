@@ -66,7 +66,7 @@ typing = [
 ts-weathernbeats = { path = "..", editable = true }
 # PyPI stops at lsst-efd-client 0.13.1, which pins numpy 1.23.5. Use the 0.14
 # series that conda/meta.yaml pins, from its GitHub repository.
-lsst-efd-client = { git = "https://github.com/lsst-ts/lsst-efd-client", tag = "1.1.2" }
+lsst-efd-client = { git = "https://github.com/lsst-ts/lsst-efd-client", tag = "v1.1.2" }
 # Inference runs on CPU, so use the CPU-only PyTorch wheels on Linux to keep
 # the CUDA libraries out of the Docker image.
 torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
