@@ -1,0 +1,81 @@
+name: Service CI
+
+env:
+  # Current supported uv version. The uv documentation recommends pinning
+  # this. The version should match the one in service/Dockerfile and the one
+  # used to write service/uv.lock. It is updated by make update-deps in
+  # service/.
+  UV_VERSION: "0.12.4"
+
+"on":
+  pull_request:
+    paths:
+      - ".github/workflows/service.yaml"
+      - "pyproject.toml"
+      - "python/**"
+      - "service/**"
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - ".github/workflows/service.yaml"
+      - "pyproject.toml"
+      - "python/**"
+      - "service/**"
+  release:
+    types: [published]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: service
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Run nox
+        run: uv run --only-group=nox nox -s lint typing test coverage-report
+
+  build:
+    concurrency:
+      group: docker
+      queue: max
+    needs: [test]
+    # The build workflow pushes to ghcr.io with GITHUB_TOKEN. Request its
+    # permissions explicitly, since this repository's defaults may not
+    # grant them.
+    permissions:
+      actions: write
+      contents: read
+      packages: write
+      statuses: read
+    secrets: inherit
+    uses: lsst-sqre/multiplatform-build-and-push/.github/workflows/build.yaml@v4
+    with:
+      images: ghcr.io/${{ github.repository }}
+      # The image installs the library from the root of the repository.
+      context: .
+      dockerfile: service/Dockerfile
+      # setuptools_scm versions the packages from the git tags.
+      fetch-depth: 0
+
+    # Only do Docker builds of service releases and pull requests from ticket
+    # branches. This will still trigger on pull requests from untrusted
+    # repositories whose branch names match our tickets/* branch convention,
+    # but in this case the build will fail with an error since the secret
+    # won't be set.
+    if: >
+      (github.event_name == 'release' && github.event.action == 'published'
+       && !startsWith(github.event.release.tag_name, 'model-v'))
+      || startsWith(github.head_ref, 'tickets/')
+      || startsWith(github.head_ref, 't/')

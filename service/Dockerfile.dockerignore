@@ -1,0 +1,31 @@
+# Docker ignore rules for service/Dockerfile. The build context is the root
+# of the repository, so these patterns are relative to it. Keep .git, which
+# setuptools_scm needs to version the library and the application.
+
+# Keep local model bundles and training output out of the build context.
+models/
+service/bundles/
+lightning_logs/
+
+# Documentation builds.
+doc/_build/
+doc/py-api/
+
+# Local environments, caches and build products anywhere in the tree.
+**/.venv
+**/.nox
+**/.tox
+**/__pycache__
+**/*.py[cod]
+**/.mypy_cache
+**/.pytest_cache
+**/.ruff_cache
+**/.coverage
+**/.coverage.*
+**/*.egg-info
+**/build
+**/dist
+
+# Editor and OS files.
+.vscode/
+**/.DS_Store

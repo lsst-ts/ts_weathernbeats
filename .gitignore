@@ -13,6 +13,10 @@ config.log
 version.py
 bin/
 
+# Built by setuptools when uv installs this package in editable mode for the
+# service in service/
+*.egg-info/
+
 # Pytest
 tests/.tests
 pytest_session.txt
@@ -20,7 +24,17 @@ pytest_session.txt
 .pytest_cache
 .coverage
 
+# PyTorch Lightning training artifacts (emitted by retrain / NBEATSx)
+lightning_logs/
+
+# Trained model bundles -- binary artifacts, not source (see review comment
+# on PR for add-nbeatsx-ridge-forecaster). Canonical shared USDF/S3DF path
+# TBD; point WEATHERNBEATS_BUNDLE at wherever the team lands on -- not here.
+models/
+service/bundles/
+
 # Local notes / editor backups / Claude Code workspace
+prompt.md
 prompt.txt
 prompt.txt~
 .prompt.txt.un~
