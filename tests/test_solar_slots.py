@@ -13,11 +13,11 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Tests for the equinox-label <-> phi <-> date-D wall-clock conversions."""
 
@@ -34,7 +34,7 @@ from lsst.ts.weathernbeats.solar_slots import (
 )
 
 
-def test_equinox_landmark_labels():
+def test_equinox_landmark_labels() -> None:
     """Solar landmarks map to their equinox-day clock labels."""
     assert phi_to_equinox_label(0.25) == "1200"  # solar midday
     assert phi_to_equinox_label(0.50) == "1800"  # sunset
@@ -42,21 +42,21 @@ def test_equinox_landmark_labels():
     assert phi_to_equinox_label(0.50 + 0.5 / 24.0) == "1830"
 
 
-def test_label_phi_round_trip():
+def test_label_phi_round_trip() -> None:
     """label -> phi -> label is the identity for the canonical slots."""
     for label in ("1200", "1430", "1800", "1830"):
         phi = equinox_label_to_phi(label)
         assert phi_to_equinox_label(phi) == label
 
 
-def test_snap_to_nearest_slot():
+def test_snap_to_nearest_slot() -> None:
     slots = solar_slots(48)
     idx, phi = snap_to_slot(0.26, slots)
     assert phi == pytest.approx(0.25, abs=1e-9)
     assert slots[idx] == pytest.approx(0.25, abs=1e-9)
 
 
-def _daytime_hours_per_phi(date):
+def _daytime_hours_per_phi(date: pd.Timestamp) -> float:
     """Daytime wall-clock hours spanned per unit of solar coordinate phi.
 
     On the idealized equinox geometry (12 h day) this equals 24 -- solar time
@@ -67,7 +67,7 @@ def _daytime_hours_per_phi(date):
     return (t1 - t0).total_seconds() / 3600.0 / (0.40 - 0.10)
 
 
-def test_equinox_solar_rate_matches_clock():
+def test_equinox_solar_rate_matches_clock() -> None:
     """On an equinox solar time advances at clock rate (~24 h per unit phi).
 
     This is the property that makes solar time coincide with clock time on the
@@ -77,7 +77,7 @@ def test_equinox_solar_rate_matches_clock():
     assert _daytime_hours_per_phi(equinox) == pytest.approx(24.0, abs=0.5)
 
 
-def test_solstice_rate_shifts():
+def test_solstice_rate_shifts() -> None:
     """On a solstice the daytime solar rate departs from the equinox rate."""
     equinox = pd.Timestamp("2026-03-20")
     winter = pd.Timestamp("2026-06-21")  # austral winter solstice, short day
@@ -89,7 +89,7 @@ def test_solstice_rate_shifts():
     assert _daytime_hours_per_phi(summer) > eq + 1.0
 
 
-def test_daytime_phi_monotonic_on_date():
+def test_daytime_phi_monotonic_on_date() -> None:
     """Wall-clock time increases with phi through the day on a fixed date."""
     date = pd.Timestamp("2026-06-21")
     times = [phi_to_clock_on_date(p, date).value for p in np.linspace(0.05, 0.45, 5)]

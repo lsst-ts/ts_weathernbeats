@@ -13,11 +13,11 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Standalone retraining: regenerate the NBEATSx + per-slot Ridge artifacts.
 
@@ -37,6 +37,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 from pathlib import Path
+from typing import Any, Iterator
 
 import numpy as np
 import pandas as pd
@@ -78,7 +79,7 @@ def load_training_grid(csv_path: str | Path | None) -> pd.DataFrame:
     return asyncio.run(fb.get_features())
 
 
-def train_nbeatsx(grid: pd.DataFrame):
+def train_nbeatsx(grid: pd.DataFrame) -> tuple[Any, list[str], list[str]]:
     """Train the direct-temperature NBEATSx network on absolute ``y``."""
     from neuralforecast import NeuralForecast
     from neuralforecast.losses.pytorch import HuberLoss
@@ -113,7 +114,14 @@ def train_nbeatsx(grid: pd.DataFrame):
     return nf, hist, futr
 
 
-def _nbeatsx_trajectories(nf, grid, hist, futr, stride=1, batch=64):
+def _nbeatsx_trajectories(
+    nf: Any,
+    grid: pd.DataFrame,
+    hist: list[str],
+    futr: list[str],
+    stride: int = 1,
+    batch: int = 64,
+) -> Iterator[tuple[int, np.ndarray]]:
     """Yield ``(iss, trajectory)`` for sliding issuance points over the grid.
 
     ``trajectory`` is the NBEATSx absolute-temperature forecast for the
@@ -149,7 +157,14 @@ def _nbeatsx_trajectories(nf, grid, hist, futr, stride=1, batch=64):
                 yield iss, traj
 
 
-def fit_slot_ridges(nf, grid, hist, futr, n_slots=STEPS_PER_DAY, stride=1):
+def fit_slot_ridges(
+    nf: Any,
+    grid: pd.DataFrame,
+    hist: list[str],
+    futr: list[str],
+    n_slots: int = STEPS_PER_DAY,
+    stride: int = 1,
+) -> dict[float, SlotModel]:
     """Fit one ``StandardScaler`` + ``Ridge`` per solar slot (keyed by phi).
 
     For every issuance point and every horizon step, the forecast step lands on
@@ -161,9 +176,7 @@ def fit_slot_ridges(nf, grid, hist, futr, n_slots=STEPS_PER_DAY, stride=1):
 
     slots = solar_slots(n_slots)
     feat_cols = [c for c in RIDGE_FEATS if c in grid.columns]
-    buckets: dict[float, dict[str, list]] = {
-        float(p): {"X": [], "y": []} for p in slots
-    }
+    buckets: dict[float, dict[str, list]] = {float(p): {"X": [], "y": []} for p in slots}
 
     solar = grid["SolarTime"].to_numpy()
     yv = grid["y"].to_numpy()
@@ -239,18 +252,10 @@ def retrain(
 def main(argv: list[str] | None = None) -> None:
     """CLI entry point for retraining."""
     parser = argparse.ArgumentParser(description="Retrain ts_weathernbeats artifacts.")
-    parser.add_argument(
-        "--csv", default=None, help="Training telemetry CSV (default: live EFD)."
-    )
-    parser.add_argument(
-        "--output", required=True, help="Output bundle directory."
-    )
-    parser.add_argument(
-        "--n-slots", type=int, default=STEPS_PER_DAY, help="Solar slots per day."
-    )
-    parser.add_argument(
-        "--stride", type=int, default=1, help="Issuance-point stride (grid steps)."
-    )
+    parser.add_argument("--csv", default=None, help="Training telemetry CSV (default: live EFD).")
+    parser.add_argument("--output", required=True, help="Output bundle directory.")
+    parser.add_argument("--n-slots", type=int, default=STEPS_PER_DAY, help="Solar slots per day.")
+    parser.add_argument("--stride", type=int, default=1, help="Issuance-point stride (grid steps).")
     args = parser.parse_args(argv)
     retrain(args.csv, args.output, n_slots=args.n_slots, stride=args.stride)
 

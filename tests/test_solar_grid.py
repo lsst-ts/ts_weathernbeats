@@ -13,11 +13,11 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Tests for solar-grid construction and preprocessing correctness."""
 
@@ -35,7 +35,7 @@ from lsst.ts.weathernbeats.solar_grid import (
 )
 
 
-def _raw_frame(days=10):
+def _raw_frame(days: int = 10) -> pd.DataFrame:
     """A multi-day 15-minute synthetic temperature frame near an equinox."""
     n = days * 24 * 4
     ds = pd.date_range("2026-03-12", periods=n, freq="15min")
@@ -44,7 +44,7 @@ def _raw_frame(days=10):
     return pd.DataFrame({"ds": ds, "y": y})
 
 
-def test_solar_time_in_unit_interval():
+def test_solar_time_in_unit_interval() -> None:
     df = _raw_frame()
     df["alt_sun"] = get_sun_altitude(pd.DatetimeIndex(df["ds"]))
     df = detect_events(df)
@@ -55,7 +55,7 @@ def test_solar_time_in_unit_interval():
     assert (np.diff(df["solarDayHour"].to_numpy()) > 0).all()
 
 
-def test_grid_step_and_columns():
+def test_grid_step_and_columns() -> None:
     df = _raw_frame()
     df["alt_sun"] = get_sun_altitude(pd.DatetimeIndex(df["ds"]))
     df = detect_events(df)
@@ -69,7 +69,7 @@ def test_grid_step_and_columns():
     assert (np.diff(pd.to_datetime(grid["ds_real"]).astype("int64")) > 0).all()
 
 
-def test_causal_spread_fill_no_future_leak():
+def test_causal_spread_fill_no_future_leak() -> None:
     """High-spread points are dropped and forward-filled, never back-filled
     from the future when a prior good value exists."""
     from lsst.ts.weathernbeats.feature_builder import FeatureBuilder
@@ -87,12 +87,12 @@ def test_causal_spread_fill_no_future_leak():
     assert out["y"].iloc[2] == 11.0
 
 
-def test_steps_per_day_constant():
+def test_steps_per_day_constant() -> None:
     assert STEPS_PER_DAY == 48
     assert SOLAR_GRID_STEP == 1.0 / 48.0
 
 
-def test_solar_time_quarter_landmarks():
+def test_solar_time_quarter_landmarks() -> None:
     """SolarTime hits the cardinal points exactly: sunrise=0.0, midday=0.25,
     sunset=0.5, solar-midnight=0.75 (the standard solar-time convention)."""
     ts = pd.date_range("2026-06-22", "2026-06-26", freq="min")
@@ -114,7 +114,7 @@ def test_solar_time_quarter_landmarks():
     assert abs(st[int(np.argmin(alt))] - 0.75) < 5 * tol
 
 
-def test_solar_time_covers_trailing_night():
+def test_solar_time_covers_trailing_night() -> None:
     """A series ending mid-night (past solar midnight) keeps its last rows:
     SolarTime there is > 0.5 (night branch), not truncated back to sunset."""
     # 12:00 UTC start through 05:00 next day: ends deep in the night at Rubin.

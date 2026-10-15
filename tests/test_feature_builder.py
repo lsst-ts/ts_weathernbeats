@@ -13,11 +13,11 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Tests for the EFD FeatureBuilder path (using the MockClient).
 
@@ -38,19 +38,19 @@ from lsst.ts.weathernbeats.feature_builder import (
 )
 
 
-def test_mock_client_query_shape():
+def test_mock_client_query_shape() -> None:
     df = asyncio.run(MockClient().query())
     assert "mean_temperature" in df.columns
     assert len(df) == 7 * 24 * 60
 
 
-def test_create_client_simulation_mode():
+def test_create_client_simulation_mode() -> None:
     fb = FeatureBuilder(simulation_mode=1)
     fb.create_client()
     assert fb.client is not None
 
 
-def test_get_features_builds_all_columns():
+def test_get_features_builds_all_columns() -> None:
     fb = FeatureBuilder(simulation_mode=1)
     grid = asyncio.run(fb.get_features())
     needed = set(NB_HIST) | set(NB_FUTR) | set(RIDGE_FEATS) | {"SolarTime", "ds", "ds_real"}
@@ -59,7 +59,7 @@ def test_get_features_builds_all_columns():
     assert grid["solar_cos"].between(-1, 1).all()
 
 
-def test_setup_fit_returns_naive_ds():
+def test_setup_fit_returns_naive_ds() -> None:
     fb = FeatureBuilder(simulation_mode=1)
     fb.create_client()
     results = asyncio.run(fb.query())

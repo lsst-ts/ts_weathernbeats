@@ -13,11 +13,11 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Bundled artifact I/O for the two-stage NBEATSx + per-slot Ridge forecaster.
 
@@ -96,9 +96,7 @@ class ModelBundle:
         """Persist the bundle to ``path`` (created if absent)."""
         path = Path(path)
         path.mkdir(parents=True, exist_ok=True)
-        self.nbeatsx.save(
-            str(path / NBEATSX_SUBDIR), overwrite=True, save_dataset=False
-        )
+        self.nbeatsx.save(str(path / NBEATSX_SUBDIR), overwrite=True, save_dataset=False)
         joblib.dump(self.slots, path / RIDGE_FILE)
         (path / METADATA_FILE).write_text(json.dumps(self.metadata, indent=2))
 

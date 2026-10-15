@@ -13,11 +13,11 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """End-to-end retrain -> save -> load -> inference on a small synthetic grid.
 
@@ -27,6 +27,7 @@ a freshly trained bundle reloads and produces a finite continuous forecast.
 """
 
 import os
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -37,7 +38,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def test_retrain_and_infer(tmp_path):
+def test_retrain_and_infer(tmp_path: Path) -> None:
     from lsst.ts.weathernbeats import train as train_mod
     from lsst.ts.weathernbeats.artifacts import ModelBundle
     from lsst.ts.weathernbeats.model import WeatherForecastModel

@@ -13,11 +13,11 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """FeatureBuilder: acquire temperature telemetry from the EFD and build the
 solar-grid feature frame consumed by the two-stage forecaster.
@@ -66,7 +66,7 @@ EFD_SITES = {
 
 # NBEATSx geometry (must match the trained artifacts; see config in retrain).
 NBEATS_INPUT_SIZE = 48  # 1 solar-day lookback
-NBEATS_HORIZON = 26     # covers up to 12 h lead
+NBEATS_HORIZON = 26  # covers up to 12 h lead
 
 # High intra-interval spread (deg C) above which a raw point is dropped and
 # causally forward-filled (no future leakage).
@@ -80,9 +80,18 @@ NB_FUTR = ["solar_sin", "solar_cos", "doy_sin", "doy_cos"]
 # auxiliary inputs are omitted in v1).  The NBEATSx prediction is appended as
 # the final feature at fit/predict time.
 RIDGE_FEATS = [
-    "y_raw", "y_lag_6", "y_lag_12", "y_lag_24", "y_lag_48",
-    "trend_solar_2h", "trend_solar_4h", "solar_sin", "solar_cos",
-    "doy_sin", "doy_cos", "dmean_1d",
+    "y_raw",
+    "y_lag_6",
+    "y_lag_12",
+    "y_lag_24",
+    "y_lag_48",
+    "trend_solar_2h",
+    "trend_solar_4h",
+    "solar_sin",
+    "solar_cos",
+    "doy_sin",
+    "doy_cos",
+    "dmean_1d",
 ]
 
 
@@ -92,9 +101,9 @@ def _backward_ols_slope(y: pd.Series, window: int) -> pd.Series:
     y_mean = y.rolling(window, min_periods=window).mean()
     x_mean = idx.rolling(window, min_periods=window).mean()
     xy_mean = (y * idx).rolling(window, min_periods=window).mean()
-    x2_mean = (idx ** 2).rolling(window, min_periods=window).mean()
+    x2_mean = (idx**2).rolling(window, min_periods=window).mean()
     cov_xy = xy_mean - x_mean * y_mean
-    var_x = x2_mean - x_mean ** 2
+    var_x = x2_mean - x_mean**2
     return cov_xy / var_x
 
 
