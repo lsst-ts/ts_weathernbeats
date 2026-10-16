@@ -13,23 +13,26 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Tests for the two-stage inference path and operational read-offs."""
+
+from typing import Any
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from lsst.ts.weathernbeats.artifacts import ModelBundle
 from lsst.ts.weathernbeats.feature_builder import NBEATS_HORIZON
 from lsst.ts.weathernbeats.model import WeatherForecastModel, interp_at
 
 
-def test_interp_at_matches_notebook_semantics():
+def test_interp_at_matches_notebook_semantics() -> None:
     """interp_at reproduces the notebook helper exactly."""
     temps = np.array([10.0, 12.0, 14.0, 16.0])
     snd = 1000.0
@@ -42,19 +45,19 @@ def test_interp_at_matches_notebook_semantics():
     assert np.isnan(interp_at(temps, snd, snd, delta))
 
 
-def test_predict_returns_horizon_curve(fake_bundle, synthetic_grid):
+def test_predict_returns_horizon_curve(fake_bundle: ModelBundle, synthetic_grid: pd.DataFrame) -> None:
     model = WeatherForecastModel(fake_bundle)
     curve = model.predict(synthetic_grid)
     assert len(curve) == NBEATS_HORIZON
-    assert {"ds", "ds_real", "SolarTime", "T_nb", "slot_phi", "T_forecast"}.issubset(
-        curve.columns
-    )
+    assert {"ds", "ds_real", "SolarTime", "T_nb", "slot_phi", "T_forecast"}.issubset(curve.columns)
     assert curve["T_forecast"].notna().all()
     # Slot phi assigned per step is one of the trained slots.
     assert set(curve["slot_phi"]).issubset(set(fake_bundle.slots))
 
 
-def test_predict_temperature_at_time_interpolates(fake_bundle, synthetic_grid):
+def test_predict_temperature_at_time_interpolates(
+    fake_bundle: ModelBundle, synthetic_grid: pd.DataFrame
+) -> None:
     model = WeatherForecastModel(fake_bundle)
     curve = model.predict(synthetic_grid)
     mid = pd.Timestamp(curve["ds_real"].iloc[len(curve) // 2])
@@ -65,15 +68,16 @@ def test_predict_temperature_at_time_interpolates(fake_bundle, synthetic_grid):
     assert np.isnan(model.predict_temperature_at_time(curve, after))
 
 
-def test_operational_forecast_readoffs(fake_bundle, synthetic_grid):
+def test_operational_forecast_readoffs(fake_bundle: ModelBundle, synthetic_grid: pd.DataFrame) -> None:
     model = WeatherForecastModel(fake_bundle)
     result = model.operational_forecast(synthetic_grid)
-    assert {"curve", "twilight_time", "twilight_temperature",
-            "dome_opening_3h", "morning_hvac_9h"}.issubset(result)
+    assert {"curve", "twilight_time", "twilight_temperature", "dome_opening_3h", "morning_hvac_9h"}.issubset(
+        result
+    )
     assert np.isfinite(result["twilight_temperature"])
 
 
-def test_horizon_advances_half_solar_day(fake_bundle, synthetic_grid):
+def test_horizon_advances_half_solar_day(fake_bundle: ModelBundle, synthetic_grid: pd.DataFrame) -> None:
     """The forecast covers NBEATS_HORIZON solar steps: the last forecast solar
     position is phi_now + NBEATS_HORIZON/STEPS_PER_DAY (~phi_now + 0.54).
 
@@ -93,10 +97,13 @@ def test_horizon_advances_half_solar_day(fake_bundle, synthetic_grid):
     assert advance > 0.5
 
 
-def test_no_fit_at_inference(fake_bundle, synthetic_grid, monkeypatch):
+def test_no_fit_at_inference(
+    fake_bundle: ModelBundle, synthetic_grid: pd.DataFrame, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Inference must never call .fit on scaler or ridge."""
     for slot in fake_bundle.slots.values():
-        def _boom(*a, **k):
+
+        def _boom(*a: Any, **k: Any) -> None:
             raise AssertionError("fit called during inference")
 
         monkeypatch.setattr(slot.scaler, "fit", _boom, raising=False)

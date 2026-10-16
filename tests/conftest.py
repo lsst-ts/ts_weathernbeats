@@ -13,17 +13,19 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Shared pytest fixtures for ts_weathernbeats tests."""
 
 import asyncio
+from typing import Any
 
 import numpy as np
+import pandas as pd
 import pytest
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
@@ -49,25 +51,25 @@ class FakeNeuralForecast:
     simply persists the last observed temperature across the horizon.
     """
 
-    def predict(self, df, futr_df):
+    def predict(self, df: pd.DataFrame, futr_df: pd.DataFrame) -> pd.DataFrame:
         out = futr_df[["unique_id", "ds"]].copy()
         last_y = float(df["y"].iloc[-1])
         out["NBEATSx"] = last_y
         return out
 
-    def save(self, *args, **kwargs):  # pragma: no cover - not used in unit tests
+    def save(self, *args: Any, **kwargs: Any) -> None:  # pragma: no cover - not used in unit tests
         raise NotImplementedError("FakeNeuralForecast cannot be persisted.")
 
 
 @pytest.fixture
-def synthetic_grid():
+def synthetic_grid() -> pd.DataFrame:
     """A solar-grid feature frame built from the MockClient telemetry."""
     fb = FeatureBuilder(simulation_mode=1)
     return asyncio.run(fb.get_features())
 
 
 @pytest.fixture
-def fake_bundle(synthetic_grid):
+def fake_bundle(synthetic_grid: pd.DataFrame) -> ModelBundle:
     """A ModelBundle with a FakeNeuralForecast and real per-slot Ridge models.
 
     Each slot's Ridge is fit on a tiny synthetic regression so inference runs

@@ -13,11 +13,11 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Solar-time grid utilities for causal twilight forecasting.
 
@@ -216,13 +216,17 @@ def resample_to_solar_grid(
     out["SolarTime"] = grid - out["DayCount"]
 
     drop = {
-        "solarDayHour", "DayCount", "SolarTime", "ds", "ds_real", "ds_local",
-        "event_sunrise", "event_sunset", "twilight_event_sunset",
+        "solarDayHour",
+        "DayCount",
+        "SolarTime",
+        "ds",
+        "ds_real",
+        "ds_local",
+        "event_sunrise",
+        "event_sunset",
+        "twilight_event_sunset",
     }
-    num_cols = [
-        c for c in df.columns
-        if c not in drop and pd.api.types.is_numeric_dtype(df[c])
-    ]
+    num_cols = [c for c in df.columns if c not in drop and pd.api.types.is_numeric_dtype(df[c])]
     for c in num_cols:
         out[c] = np.interp(grid, x, df[c].to_numpy(dtype=float))
 
@@ -260,11 +264,13 @@ def find_twilight_targets(df: pd.DataFrame) -> pd.DataFrame:
 
     events = []
     for i in idxs:
-        events.append({
-            "grid_idx": int(i),
-            "solarDayHour": df["solarDayHour"].iloc[i],
-            "ds_real": df["ds_real"].iloc[i],
-            "DayCount": df["DayCount"].iloc[i],
-            "y_actual": df["y"].iloc[i],
-        })
+        events.append(
+            {
+                "grid_idx": int(i),
+                "solarDayHour": df["solarDayHour"].iloc[i],
+                "ds_real": df["ds_real"].iloc[i],
+                "DayCount": df["DayCount"].iloc[i],
+                "y_actual": df["y"].iloc[i],
+            }
+        )
     return pd.DataFrame(events)

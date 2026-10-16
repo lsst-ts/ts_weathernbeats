@@ -42,3 +42,10 @@ prompt.txt~
 *.un~
 .claude/
 CLAUDE.md
+.pre-commit-config.yaml
+.LICENSE.txt
+.flake8
+.isort.cfg
+.mypy.ini
+.ruff.toml
+towncrier.toml

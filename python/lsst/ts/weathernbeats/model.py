@@ -13,11 +13,11 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Inference-only two-stage NBEATSx + per-slot Ridge temperature forecaster.
 
@@ -74,7 +74,12 @@ MORNING_HVAC_LEAD_H = 9.0
 # (RubinsOraclePaper/results/paper_results_final.csv); see fig3.  Highest power
 # first.  The bundle metadata may override this under key "std_lead_poly".
 STD_LEAD_POLY = [
-    8.02e-07, -6.7537e-05, 0.002195727, -0.033996664, 0.275156312, -0.044874836,
+    8.02e-07,
+    -6.7537e-05,
+    0.002195727,
+    -0.033996664,
+    0.275156312,
+    -0.044874836,
 ]
 
 
@@ -129,10 +134,7 @@ class WeatherForecastModel:
 
         usable = grid.dropna(subset=hist_cols + ["y"]).reset_index(drop=True)
         if len(usable) < NBEATS_INPUT_SIZE:
-            raise ValueError(
-                f"Need >= {NBEATS_INPUT_SIZE} clean lookback rows, "
-                f"got {len(usable)}."
-            )
+            raise ValueError(f"Need >= {NBEATS_INPUT_SIZE} clean lookback rows, got {len(usable)}.")
         hist = usable.iloc[-NBEATS_INPUT_SIZE:][["ds", "y"] + hist_cols + futr_cols].copy()
         hist["unique_id"] = "temp"
 
@@ -142,17 +144,13 @@ class WeatherForecastModel:
         futr = self._future_solar_frame(usable, future_ds, futr_cols)
 
         forecast = self.bundle.nbeatsx.predict(df=hist, futr_df=futr).reset_index(drop=True)
-        model_col = next(
-            c for c in forecast.columns if c not in ("unique_id", "ds", "index")
-        )
+        model_col = next(c for c in forecast.columns if c not in ("unique_id", "ds", "index"))
         futr = futr.reset_index(drop=True)
         futr["T_nb"] = forecast[model_col].to_numpy()
         return futr
 
     @staticmethod
-    def _future_solar_frame(
-        grid: pd.DataFrame, future_ds: np.ndarray, futr_cols: list[str]
-    ) -> pd.DataFrame:
+    def _future_solar_frame(grid: pd.DataFrame, future_ds: np.ndarray, futr_cols: list[str]) -> pd.DataFrame:
         """Build the NBEATSx future-exog frame, extrapolating solar coords.
 
         The synthetic solar clock is perfectly regular, so the future
@@ -279,19 +277,13 @@ class WeatherForecastModel:
         real_fc = np.interp(solar_fc, ev_solar, ev_real)
         return pd.to_datetime((real_fc * 1e9).astype("int64"))
 
-    def predict_temperature_at_time(
-        self, curve: pd.DataFrame, target: pd.Timestamp | float
-    ) -> float:
+    def predict_temperature_at_time(self, curve: pd.DataFrame, target: pd.Timestamp | float) -> float:
         """Interpolate the corrected curve at an arbitrary target time.
 
         ``target`` may be a `pandas.Timestamp` (UTC) or a Unix timestamp.
         Returns ``NaN`` if the target falls outside the forecast horizon.
         """
-        target_unix = (
-            float(target)
-            if isinstance(target, (int, float))
-            else pd.Timestamp(target).timestamp()
-        )
+        target_unix = float(target) if isinstance(target, (int, float)) else pd.Timestamp(target).timestamp()
         x = pd.to_datetime(curve["ds_real"]).astype("int64").to_numpy() / 1e9
         y = curve["T_forecast"].to_numpy(dtype=float)
         if target_unix < x[0] or target_unix > x[-1]:
@@ -340,9 +332,7 @@ class WeatherForecastModel:
         return {
             "curve": curve,
             "twilight_time": twilight_time,
-            "twilight_temperature": self.predict_temperature_at_time(
-                curve, twilight_unix
-            ),
+            "twilight_temperature": self.predict_temperature_at_time(curve, twilight_unix),
             "dome_opening_3h": self.predict_temperature_at_time(
                 curve, twilight_unix - DOME_OPENING_LEAD_H * 3600.0
             ),
