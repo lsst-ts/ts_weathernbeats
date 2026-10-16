@@ -88,7 +88,7 @@ Otherwise, publishing the model release will also start a service image build.
 From the repository root, confirm that the bundle's ``metadata.json`` has ``model_version`` set to ``0.2.0``.
 Then archive the whole directory and check its SHA-256 digest::
 
-    tar -czf /tmp/nbeatsx_ridge_v0.2.0.tar.gz \
+    COPYFILE_DISABLE=1 tar -czf /tmp/nbeatsx_ridge_v0.2.0.tar.gz \
         -C service/bundles nbeatsx_ridge_v0.2.0
     shasum -a 256 /tmp/nbeatsx_ridge_v0.2.0.tar.gz
 

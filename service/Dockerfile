@@ -77,7 +77,7 @@ ADD --checksum=sha256:${MODEL_SHA256} \
     https://github.com/lsst-ts/ts_weathernbeats/releases/download/model-v${MODEL_VERSION}/nbeatsx_ridge_v${MODEL_VERSION}.tar.gz \
     /tmp/model-bundle.tar.gz
 RUN mkdir -p /opt/models \
-    && tar -xzf /tmp/model-bundle.tar.gz -C /opt/models \
+    && tar --exclude='._*' -xzf /tmp/model-bundle.tar.gz -C /opt/models \
     && chmod a+rX /opt/models \
     && rm /tmp/model-bundle.tar.gz
 ENV WEATHERNBEATS_BUNDLE=/opt/models/nbeatsx_ridge_v${MODEL_VERSION}
