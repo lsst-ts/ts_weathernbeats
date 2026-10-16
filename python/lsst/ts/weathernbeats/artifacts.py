@@ -107,6 +107,8 @@ class ModelBundle:
 
         path = Path(path)
         nbeatsx = NeuralForecast.load(str(path / NBEATSX_SUBDIR))
+        for model in nbeatsx.models:
+            model.trainer_kwargs["logger"] = False
         slots: dict[float, SlotModel] = joblib.load(path / RIDGE_FILE)
         metadata = json.loads((path / METADATA_FILE).read_text())
         return cls(nbeatsx=nbeatsx, slots=slots, metadata=metadata)

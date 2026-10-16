@@ -22,9 +22,12 @@
 """Tests for the per-slot Ridge artifact I/O (NBEATSx save/load is exercised
 in the retrain integration test, which requires PyTorch)."""
 
+import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import joblib
+import pytest
 
 from lsst.ts.weathernbeats.artifacts import ModelBundle, SlotModel
 
@@ -56,3 +59,24 @@ def test_slot_self_describing(fake_bundle: ModelBundle) -> None:
 def test_bundle_slot_phis_sorted(fake_bundle: ModelBundle) -> None:
     phis = fake_bundle.slot_phis
     assert phis == sorted(phis)
+
+
+def test_load_disables_inference_logging(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Loaded models do not write Lightning logs during prediction."""
+    import neuralforecast
+
+    models = [
+        SimpleNamespace(trainer_kwargs={"logger": True}),
+        SimpleNamespace(trainer_kwargs={}),
+    ]
+    monkeypatch.setattr(
+        neuralforecast.NeuralForecast,
+        "load",
+        lambda path: SimpleNamespace(models=models),
+    )
+    joblib.dump({}, tmp_path / "ridge_slots.joblib")
+    (tmp_path / "metadata.json").write_text(json.dumps({}))
+
+    ModelBundle.load(tmp_path)
+
+    assert all(model.trainer_kwargs["logger"] is False for model in models)
